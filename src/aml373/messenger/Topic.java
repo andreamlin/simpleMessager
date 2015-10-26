@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * @author andrealin
  *
  */
-class Topic {
+public class Topic {
 	String identifier; //name for this topic
 	Queue<Message> messages = new ConcurrentLinkedQueue<>();
 	Set<Subscription> subscriptions = new HashSet<>();
@@ -43,8 +43,8 @@ class Topic {
 	 * Subscribe to receive new messages from this topic.
 	 * @return
 	 */
-	Subscription subscribe() {
-		Subscription newSub = new Subscription(this);
+	Subscription subscribe(MessageHandler handler) {
+		Subscription newSub = new Subscription(this, handler);
 		subscriptions.add(newSub); 
 		return newSub;
 	}
@@ -72,5 +72,9 @@ class Topic {
 	void unsubscribe(Subscription subscription) {
 		subscriptions.remove(subscription);
 	}
-
+	
+	@Override
+	public String toString() {
+		return identifier;
+	}
 }

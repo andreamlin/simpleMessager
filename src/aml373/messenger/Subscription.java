@@ -11,14 +11,16 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class Subscription {
 	Queue<Message> messages = new ConcurrentLinkedQueue<>();
 	Topic topic;
+	MessageHandler handler;
 	
 	/**
 	 * Package private constructor. 
 	 * Bind a subscription to a topic.
 	 * @param topic to bind to
 	 */
-	Subscription(Topic topic) {
+	Subscription(Topic topic, MessageHandler handler) {
 		this.topic = topic;
+		this.handler = handler;
 	}
 	
 	/**
@@ -43,6 +45,7 @@ public class Subscription {
 	 */
 	void addMessage(Message msg) {
 		messages.add(msg);
+		handler.handleMessage(msg);
 	}
 	
 	/**

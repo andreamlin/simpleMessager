@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author andrealin
  */
 public class Messenger {
-	private Messenger instance; 
+	private static Messenger instance; 
 	Map<String, Topic> topics = new ConcurrentHashMap<>();
 	
 	/**
@@ -18,7 +18,7 @@ public class Messenger {
 	 */
 	private Messenger() {}
 	
-	public Messenger getInstance() {
+	public static Messenger getInstance() {
 		if (instance == null) {
 			instance = new Messenger();
 		}
@@ -52,8 +52,8 @@ public class Messenger {
 	 * that hasn't been created yet.
 	 * @param topicId
 	 */
-	public Subscription subscribe(String topicId){
+	public Subscription subscribe(String topicId, MessageHandler handler){
 		Topic topic = getTopic(topicId);
-		return topic.subscribe();
+		return topic.subscribe(handler);
 	}
 }
