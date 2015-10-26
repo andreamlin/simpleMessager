@@ -88,13 +88,16 @@ public class Runner {
 				}
 			};
 			messenger.subscribe(APSYNDICATE, readHandler);
+			while(true) {
+				int i = 0;
+			}
 		}
 	};
 	
 	public static void main(String[] args) {
 		student.start();
-		banker.start();
-		wsj.start();
+//		banker.start();
+//		wsj.start();
 		associatedPress.start();
 	}
 }
