@@ -1,20 +1,17 @@
 package aml373.messenger;
 
 import java.util.Map;
-import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * You can either subscribe or publish to a particular topic 
  * (so either push data to a topic or 
- * read the data from the topic).
+ * read the data from the topic). User interacts with this class.
  * @author andrealin
  */
 public class Messenger {
 	private Messenger instance; 
-	Map<String, Queue<Packet>> topics = new ConcurrentHashMap<>();
-	
+	Map<String, Topic> topics = new ConcurrentHashMap<>();
 	
 	/**
 	 * Singleton class. Private constructor.
@@ -34,14 +31,20 @@ public class Messenger {
 	 * 	These identifiers must be unique.
 	 * @param p - packet to publish
 	 */
-	public void publish(String topicId, Packet p) {
-		Queue<Packet> queue;
-		queue = topics.containsKey(topicId) ? 
-				topics.get(topicId) : 
-				new ConcurrentLinkedQueue<>();
-		
-		queue.offer(p);
-		topics.put(topicId, queue);
+	public void publish(String topicId, Message msg) {
+		Topic topic = getTopic(topicId);
+		topic.publish(msg);
+	}
+	
+	public Topic getTopic(String topicId) {
+		Topic topic;
+		if (!topics.containsKey(topicId)) {
+			topic = new Topic(topicId);
+			topics.put(topicId, topic);
+		} else {
+			topic = topics.get(topicId);
+		}
+		return topic;
 	}
 	
 	/**
@@ -49,7 +52,8 @@ public class Messenger {
 	 * that hasn't been created yet.
 	 * @param topicId
 	 */
-	public void subscribe(String topicId){
-		
+	public Subscription subscribe(String topicId){
+		Topic topic = getTopic(topicId);
+		return topic.subscribe();
 	}
 }
