@@ -43,8 +43,8 @@ public class Topic {
 	 * Subscribe to receive new messages from this topic.
 	 * @return
 	 */
-	Subscription subscribe(MessageHandler handler) {
-		Subscription newSub = new Subscription(this, handler);
+	Subscription subscribe() {
+		Subscription newSub = new Subscription(this);
 		subscriptions.add(newSub); 
 		return newSub;
 	}

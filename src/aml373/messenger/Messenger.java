@@ -52,8 +52,8 @@ public class Messenger {
 	 * that hasn't been created yet.
 	 * @param topicId
 	 */
-	public Subscription subscribe(String topicId, MessageHandler handler){
+	public Subscription subscribe(String topicId){
 		Topic topic = getTopic(topicId);
-		return topic.subscribe(handler);
+		return topic.subscribe();
 	}
 }

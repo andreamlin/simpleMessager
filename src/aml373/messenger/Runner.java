@@ -19,10 +19,11 @@ public class Runner {
 			Messenger messenger = Messenger.getInstance();
 			while(i < 50) {
 				messenger.publish(APSYNDICATE, new Message("AP" + Integer.toString(i++)));
+				notifyAll();
 				try {
-					sleep(2000); //sleep for 2 seconds
+					wait();
 				} catch (InterruptedException e) {
-					e.printStackTrace();
+//					e.printStackTrace();
 				}
 			}
 		}
@@ -34,24 +35,21 @@ public class Runner {
 		public void run() {
 			int i = 0;
 			Messenger messenger = Messenger.getInstance();
-			MessageHandler readAndPublish = new MessageHandler() {
-				@Override
-				public void handleMessage(Message msg){
-					Messenger.getInstance().publish(WSJFEED, 
-							new Message("Wall Street Journal: " 
-									+ msg.getBody()));
-				}
-			};
-			
-			messenger.subscribe(APSYNDICATE, readAndPublish);
+			Subscription ap_sub = messenger.subscribe(APSYNDICATE);
 			
 			while(i < 50) {
 				messenger.publish(WSJFEED, new Message("Wall Street Journal: " + Integer.toString(i++)));
-				try {
-					sleep(1000); //sleep for 2 seconds
-				} catch (InterruptedException e) {
-					e.printStackTrace();
+				while (!ap_sub.isEmpty()) {
+					messenger.publish(WSJFEED, 
+							new Message("Wall Street Journal: " 
+									+ ap_sub.poll().getBody()));
 				}
+				notifyAll();
+				try {
+					wait();
+				} catch (InterruptedException e) {
+				}
+				i++;
 			}
 			
 		}
@@ -62,17 +60,23 @@ public class Runner {
 		@Override
 		public void run() {
 			Messenger messenger = Messenger.getInstance();
-			MessageHandler readHandler = new MessageHandler() {
-				@Override
-				public void handleMessage(Message msg){
-					System.out.println("banker finds \"" + msg.getBody() + "\" to be interesting");
+			Subscription wsj_sub = messenger.subscribe(WSJFEED);
+			Subscription ap_sub = messenger.subscribe(APSYNDICATE);	
+			int i = 0;
+			while(i < 50){
+				while (!ap_sub.isEmpty()) {
+					System.out.println("banker reads " + ap_sub.poll().getBody());
 				}
-			};
-			messenger.subscribe(WSJFEED, readHandler);
-			messenger.subscribe(APSYNDICATE, readHandler);	
-			while(true) {
-				int i = 0;
-			}
+				while (!wsj_sub.isEmpty()) {
+					System.out.println("banker reads " + wsj_sub.poll().getBody());
+				}
+				notifyAll();
+				try {
+					wait(); //sleep for 2 seconds
+				} catch (InterruptedException e) {
+				}
+				i++;
+			}	
 		}
 	};
 	
@@ -81,23 +85,21 @@ public class Runner {
 		@Override
 		public void run() {
 			Messenger messenger = Messenger.getInstance();
-			MessageHandler readHandler = new MessageHandler() {
-				public void handleMessage(Message msg){
-					System.out.println("student reads article \"" 
-							+ msg.getBody() + "\"");
-				}
-			};
-			messenger.subscribe(APSYNDICATE, readHandler);
-			while(true) {
-				int i = 0;
+			Subscription ap_sub = messenger.subscribe(APSYNDICATE);
+			while (!ap_sub.isEmpty()) {
+				System.out.println("banker reads " + ap_sub.poll().getBody());
+			}
+			try {
+				sleep(1000); //sleep for 2 seconds
+			} catch (InterruptedException e) {
 			}
 		}
 	};
 	
 	public static void main(String[] args) {
 		student.start();
-//		banker.start();
-//		wsj.start();
+		banker.start();
+		wsj.start();
 		associatedPress.start();
 	}
 }
